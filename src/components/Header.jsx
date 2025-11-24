@@ -4,14 +4,17 @@ import { UserButton } from "@clerk/nextjs";
 import { SignInButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
-import React, { use } from "react";
-import { Button } from "./ui/button";
+import React, { useState } from "react";import { Button } from "./ui/button";
 import { Authenticated, Unauthenticated } from "convex/react";
 import { BarLoader } from "react-spinners";
 import { useStoreUser } from "@/hooks/useStoreUserEffect";
+import { Plus } from "lucide-react";
+import { Ticket } from "lucide-react";
 
 const Header = () => {
   const { isLoading } = useStoreUser();
+
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-xl z-20 border-b ">
@@ -34,9 +37,46 @@ const Header = () => {
 
           {/* right side actions  */}
           <div className="flex items-center">
+            <Button
+              variant={"ghost"}
+              size={"sm"}
+              className="cursor-pointer"
+              onClick={() => setShowUpgradeModal(true)}
+            >
+              Pricing
+            </Button>
+
+            <Button variant={"ghost"} size={"sm"} asChild className={"mr-2"}>
+              <Link href="/explore">Explore</Link>
+            </Button>
+
             <Authenticated>
               {/* create event  */}
-              <UserButton />
+              <Button
+                asChild
+                className="flex gap-1 mr-4 font-semibold"
+                size={"sm"}
+              >
+                <Link href="/create-event">
+                  <Plus className="w-4 h-5" />
+                  <span className="hidden md:inline">Create Event</span>
+                </Link>
+              </Button>
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Link
+                    label="My Tickets"
+                    labelIcon={<Ticket size={16} />}
+                    href="/my-tickets"
+                  />
+                  <UserButton.Link
+                    label="My Events"
+                    labelIcon={<Ticket size={16} />}
+                    href="/my-events"
+                  />
+                  <UserButton.Action label="manageAccount" />
+                </UserButton.MenuItems>
+              </UserButton>
             </Authenticated>
             <Unauthenticated>
               <SignInButton mode="modal">

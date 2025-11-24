@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import Footer from "@/components/Footer";
 
 export const metadata = {
   title: "Manage Mate",
@@ -45,12 +46,7 @@ export default function RootLayout({ children }) {
                 <div className="relative z-10 min-h-[90vh]">{children}</div>
 
                 {/* footer  */}
-                <footer className="border-t border-gray-800/50 py-8 px-6 max-w-7xl mx-auto">
-                  <div className="text-sm text-gray-400 text-center">
-                    &copy; {new Date().getFullYear()} Manage Mate Inc. | All
-                    rights reserved
-                  </div>
-                </footer>
+                <Footer />
               </main>
             </ConvexClientProvider>
           </ClerkProvider>

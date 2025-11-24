@@ -10,13 +10,16 @@ export const store = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token_identifier", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier),
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
       )
       .unique();
     if (user !== null) {
       // If we've seen this identity before but the name has changed, patch the value.
       if (user.name !== identity.name) {
-        await ctx.db.patch(user._id, { name: identity.name });
+        await ctx.db.patch(user._id, {
+          name: identity.name,
+          updatedAt: Date.now(),
+        });
       }
       return user._id;
     }
