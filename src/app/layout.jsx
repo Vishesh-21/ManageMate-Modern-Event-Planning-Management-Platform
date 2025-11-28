@@ -6,6 +6,7 @@ import { ConvexClientProvider } from "./ConvexClientProvider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import Footer from "@/components/Footer";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata = {
   title: "Manage Mate",
@@ -47,6 +48,7 @@ export default function RootLayout({ children }) {
 
                 {/* footer  */}
                 <Footer />
+                <Toaster richColors />
               </main>
             </ConvexClientProvider>
           </ClerkProvider>
