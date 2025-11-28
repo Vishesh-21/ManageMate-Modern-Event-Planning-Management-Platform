@@ -1,126 +1,106 @@
 import { defineSchema, defineTable } from "convex/server";
-import { query } from "./_generated/server";
 import { v } from "convex/values";
-import { register } from "next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup";
 
 export default defineSchema({
-  //user details table
+  // Users table
   users: defineTable({
-    name: v.string(),
-    tokenIdentifier: v.string(),
+    // Clerk auth
     email: v.string(),
+    tokenIdentifier: v.string(), // Clerk user ID for auth
+    name: v.string(),
     imageUrl: v.optional(v.string()),
 
-    // onboarding
+    // Onboarding
     hasCompletedOnboarding: v.boolean(),
+
+    // Attendee preferences (from onboarding)
     location: v.optional(
       v.object({
         city: v.string(),
-        state: v.optional(v.string()),
+        state: v.optional(v.string()), // Added state field
         country: v.string(),
       })
     ),
+    interests: v.optional(v.array(v.string())), // Min 3 categories
 
-    // preferences
-    interests: v.optional(v.array(v.string())), // min having 3
+    // Organizer tracking (User Subscription)
+    freeEventsCreated: v.number(), // Track free event limit (1 free)
 
-    freeEventCreated: v.number(), // track free event limit
-
-    // timestamps
+    // Timestamps
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_token_identifier", ["tokenIdentifier"], { unique: true }),
+  }).index("by_token_identifier", ["tokenIdentifier"]), // Primary auth lookup
 
-  // events table
+  // Events table
   events: defineTable({
     title: v.string(),
     description: v.string(),
     slug: v.string(),
 
-    //organizer details
+    // Organizer
     organizerId: v.id("users"),
     organizerName: v.string(),
 
-    // event details
+    // Event details
     category: v.string(),
     tags: v.array(v.string()),
 
-    // Date & time
+    // Date & Time
     startDate: v.number(),
     endDate: v.number(),
     timezone: v.string(),
 
-    // location details
-    location: v.union(v.literal("online"), v.literal("physical")),
+    // Location
+    locationType: v.union(v.literal("physical"), v.literal("online")),
     venue: v.optional(v.string()),
     address: v.optional(v.string()),
-    city: v.optional(v.string()),
-    state: v.optional(v.string()),
+    city: v.string(),
+    state: v.optional(v.string()), // Added state field
+    country: v.string(),
 
-    // capacity and ticketing
-    capacity: v.optional(v.number()),
+    // Capacity & Ticketing
+    capacity: v.number(),
     ticketType: v.union(v.literal("free"), v.literal("paid")),
-    ticketPrice: v.optional(v.number()),
+    ticketPrice: v.optional(v.number()), // Paid at event offline
     registrationCount: v.number(),
 
-    // customizations
-    imageUrl: v.optional(v.string()),
+    // Customization
+    coverImage: v.optional(v.string()),
     themeColor: v.optional(v.string()),
 
-    // timestamps
+    // Timestamps
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_organizer", ["organizerId"])
     .index("by_category", ["category"])
+    .index("by_start_date", ["startDate"])
     .index("by_slug", ["slug"])
-    .index("search_title", { searchField: "title" }),
+    .searchIndex("search_title", { searchField: "title" }),
 
-  //registrations table
+  // Registrations/Tickets
   registrations: defineTable({
     eventId: v.id("events"),
     userId: v.id("users"),
 
-    //attendee info
+    // Attendee info
     attendeeName: v.string(),
     attendeeEmail: v.string(),
 
-    // OR code for entry
-    qrCode: v.string(),
+    // QR Code for entry
+    qrCode: v.string(), // Unique ID for QR
 
-    //check in
+    // Check-in
     checkedIn: v.boolean(),
     checkedInAt: v.optional(v.number()),
 
-    //status
-    status: v.union(
-      v.literal("pending"),
-      v.literal("confirmed"),
-      v.literal("cancelled")
-    ),
+    // Status
+    status: v.union(v.literal("confirmed"), v.literal("cancelled")),
 
-    //registered at
     registeredAt: v.number(),
   })
     .index("by_event", ["eventId"])
     .index("by_user", ["userId"])
-    .index("by_event_and_user", ["eventId", "userId"])
+    .index("by_event_user", ["eventId", "userId"])
     .index("by_qr_code", ["qrCode"]),
-});
-
-export const getCurrentUser = query({
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_token_identifier", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
-      )
-      .unique();
-
-    return user;
-  },
 });
