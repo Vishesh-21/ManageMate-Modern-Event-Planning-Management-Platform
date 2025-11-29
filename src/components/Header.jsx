@@ -4,7 +4,8 @@ import { UserButton } from "@clerk/nextjs";
 import { SignInButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";import { Button } from "./ui/button";
+import React, { useState } from "react";
+import { Button } from "./ui/button";
 import { Authenticated, Unauthenticated } from "convex/react";
 import { BarLoader } from "react-spinners";
 import { useStoreUser } from "@/hooks/useStoreUserEffect";
@@ -22,7 +23,7 @@ const Header = () => {
           {/* logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/iimmmage-removebg-preview.png"
+              src="/manage-mate-logo.png"
               alt="logo image"
               height={500}
               width={500}
