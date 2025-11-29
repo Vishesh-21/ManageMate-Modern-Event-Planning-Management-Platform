@@ -1,7 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 const CategoryCard = ({ category }) => {
+  const router = useRouter();
+  const handleEventClick = (category) => {
+    router.push(`/explore/${category}`);
+  };
+
   return (
     <Card
       key={category.id}

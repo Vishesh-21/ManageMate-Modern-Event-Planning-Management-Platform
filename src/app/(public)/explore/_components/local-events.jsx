@@ -3,14 +3,14 @@ import { createSlug } from "@/lib/helper";
 import { ArrowRight } from "lucide-react";
 import React from "react";
 
-const LocalEvents = ({ currentUser, onEventClick }) => {
+const LocalEvents = ({ currentUser, router }) => {
   const handelClick = () => {
     const city = currentUser?.location?.city || "Gurgaon";
     const state = currentUser?.location?.state || "Haryana";
 
     const slug = createSlug(city, state);
 
-    onEventClick(slug);
+    router.push(`/explore/${slug}`);
   };
 
   return (
