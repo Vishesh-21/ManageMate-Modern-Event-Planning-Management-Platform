@@ -18,10 +18,10 @@ const ExplorePage = () => {
   //fetch current user location
   const { data: currentUser } = useConvexQuery(api.users.getCurrentUser);
   const { data: featuredEvents, loading: loadingFeaturedEvents } =
-    useConvexQuery(api.events.getFeaturedEvents, { limit: 10 });
+    useConvexQuery(api.explore.getFeaturedEvents, { limit: 10 });
 
   const { data: localEvents, loading: loadingLocalEvents } = useConvexQuery(
-    api.events.getEventsByLocation,
+    api.explore.getEventsByLocation,
     {
       city: currentUser?.city || "Gurgaon",
       state: currentUser?.state || "Haryana",
@@ -30,12 +30,12 @@ const ExplorePage = () => {
   );
 
   const { data: popularEvents, loading: loadingPopularEvents } = useConvexQuery(
-    api.events.getPopularEvents,
+    api.explore.getPopularEvents,
     { limit: 8 }
   );
 
   const { data: categoryCount, loading: loadingCategoryCount } = useConvexQuery(
-    api.events.getCategoryCount
+    api.explore.getCategoryCounts
   );
 
   const categoriesWithCount = CATEGORIES.map((category) => {

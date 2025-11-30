@@ -17,8 +17,6 @@ export function useOnBoarding() {
     api.users.getCurrentUser
   );
 
-  console.log("currentUser", currentUser);
-
   useEffect(() => {
     // still loading → do nothing
     if (currentUser === undefined || loading) return;

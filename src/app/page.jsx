@@ -7,7 +7,7 @@ const HomePage = () => {
   return (
     <div className="md:mt-0 mt-10">
       <section className="pb-16 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-4 items-center relative z-10">
+        <div className="max-w-7xl mx-auto grid md:lg:grid-cols-2 grid-cols-1 md:mt-0 mt-24 gap-4 items-center relative z-10">
           {/* left  */}
           <div className="text-center sm:text-left">
             <span className="text-gray-500 font-light tracking-wide mb-6">
@@ -22,7 +22,9 @@ const HomePage = () => {
               </span>
             </h1>
             <p className="text-medium sm:text-medium text-gray-400 mb-8 max-w-lg font-light">
-              ManageMate helps you plan and run events with speed and precision, bringing tasks, schedules, and details into one smooth, stress-free workspace.
+              ManageMate helps you plan and run events with speed and precision,
+              bringing tasks, schedules, and details into one smooth,
+              stress-free workspace.
             </p>
 
             <Link href={"/explore"}>
@@ -39,7 +41,7 @@ const HomePage = () => {
               alt="hero image"
               width={300}
               height={300}
-              className="w-[100%] h-auto scale-[1.1]"
+              className="w-full h-auto scale-[1.1]"
               priority
             />
           </div>
