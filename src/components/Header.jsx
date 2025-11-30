@@ -1,6 +1,6 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
+import { useAuth, UserButton } from "@clerk/nextjs";
 import { SignInButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,6 +14,9 @@ import { Ticket } from "lucide-react";
 import { OnboardingModel } from "./onboarding-model";
 import { useOnBoarding } from "@/hooks/useOnBoarding";
 import SearchLocationBar from "./search-location-bar";
+import { Badge } from "./ui/badge";
+import { Crown } from "lucide-react";
+import { UpgradeModal } from "./upgrade-modal";
 
 const Header = () => {
   const { isLoading } = useStoreUser();
@@ -22,6 +25,10 @@ const Header = () => {
 
   const { showOnBoarding, handleOnBoardingComplete, handleOnBoardingSkip } =
     useOnBoarding();
+
+  const { has } = useAuth();
+  const hasPro = has?.({ plan: "pro" });
+
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-xl z-20 border-b ">
@@ -38,6 +45,16 @@ const Header = () => {
             />
 
             {/* pro badge  */}
+            {hasPro && (
+              <Badge
+                className={
+                  "bg-linear-to-r from-pink-500 to-orange-500 gap-1 text-white mt-3"
+                }
+              >
+                <Crown className="w-3 h-3" />
+                Pro
+              </Badge>
+            )}
           </Link>
 
           {/* search and location - desktop only  */}
@@ -47,14 +64,16 @@ const Header = () => {
 
           {/* right side actions  */}
           <div className="flex items-center">
-            <Button
-              variant={"ghost"}
-              size={"sm"}
-              className="cursor-pointer"
-              onClick={() => setShowUpgradeModal(true)}
-            >
-              Pricing
-            </Button>
+            {!hasPro && (
+              <Button
+                variant={"ghost"}
+                size={"sm"}
+                className="cursor-pointer"
+                onClick={() => setShowUpgradeModal(true)}
+              >
+                Pricing
+              </Button>
+            )}
 
             <Button variant={"ghost"} size={"sm"} asChild className={"mr-2"}>
               <Link href="/explore">Explore</Link>
@@ -115,6 +134,13 @@ const Header = () => {
           isOpen={showOnBoarding}
           onClose={handleOnBoardingSkip}
           onComplete={handleOnBoardingComplete}
+        />
+
+        {/* upgrade modal */}
+        <UpgradeModal
+          isOpen={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+          trigger="header"
         />
       </nav>
     </>
