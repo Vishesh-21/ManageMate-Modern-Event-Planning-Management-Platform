@@ -11,11 +11,16 @@ import { BarLoader } from "react-spinners";
 import { useStoreUser } from "@/hooks/useStoreUserEffect";
 import { Plus } from "lucide-react";
 import { Ticket } from "lucide-react";
+import { OnboardingModel } from "./onboarding-model";
+import { useOnBoarding } from "@/hooks/useOnBoarding";
 
 const Header = () => {
   const { isLoading } = useStoreUser();
 
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const { showOnBoarding, handleOnBoardingComplete, handleOnBoardingSkip } =
+    useOnBoarding();
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-xl z-20 border-b ">
@@ -97,6 +102,13 @@ const Header = () => {
             <BarLoader width={"100%"} color="#a855f0" />
           </div>
         )}
+
+        {/* modals  */}
+        <OnboardingModel
+          isOpen={showOnBoarding}
+          onClose={handleOnBoardingSkip}
+          onComplete={handleOnBoardingComplete}
+        />
       </nav>
     </>
   );

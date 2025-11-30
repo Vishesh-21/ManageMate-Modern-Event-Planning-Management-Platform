@@ -51,6 +51,7 @@ const ExplorePage = () => {
     router.push(`/events/${slug}`);
   };
 
+  // check if data is loading
   const isLoading =
     loadingFeaturedEvents ||
     loadingLocalEvents ||
@@ -81,10 +82,7 @@ const ExplorePage = () => {
       {/* local events  */}
       {localEvents && localEvents.length > 0 && (
         <>
-          <LocalEvents
-            currentUser={currentUser}
-            router={router}
-          />
+          <LocalEvents currentUser={currentUser} router={router} />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
             {localEvents.map((event) => (
               <EventCard
