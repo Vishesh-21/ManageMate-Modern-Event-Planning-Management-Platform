@@ -76,3 +76,40 @@ export function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
+
+//color presets - show all for pro , only default for free
+export const colorPresetsFunction = (hasPro) => {
+  if (hasPro) {
+    return [
+      "#1e3a8a",
+      "#1e293b",
+      "#991b1b",
+      "#c2410c",
+      "#f59e0b",
+      "#ca8a04",
+      "#65a30d",
+      "#15803d",
+      "#0d9488",
+      "#06b6d4",
+      "#0284c7",
+      "#86198f",
+      "#6d28d9",
+      "#3b82f6",
+      "#e879f9",
+      "#a5b4fc",
+      "#a78bfa",
+      "#082f49",
+    ];
+  } else {
+    return ["#1e3a8a"];
+  }
+};
+
+//to combine date and time to single ISO string
+export const combineDateAndTime = (date, time) => {
+  if (!date || !time) return null;
+  const [hours, minutes] = time.split(":").map(Number);
+  const d = new Date(date);
+  d.setHours(hours, minutes, 0, 0);
+  return d;
+};

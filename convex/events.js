@@ -1,6 +1,7 @@
 import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { query } from "./_generated/server";
 
 export const createEvent = mutation({
   args: {
@@ -22,29 +23,17 @@ export const createEvent = mutation({
     ticketPrice: v.optional(v.number()),
     coverImage: v.optional(v.string()),
     themeColor: v.optional(v.string()),
-    hasPro: v.optional(v.boolean()),
   },
 
   handler: async (ctx, args) => {
     try {
       const user = await ctx.runQuery(internal.users.getCurrentUser);
 
-      //server side check : verify event limit for the free users
-      if (!hasPro && user.freeEventsCreated > 10) {
-        throw new Error(
-          "You have reached the limit of free events. Please upgrade to a paid plan to create more events."
-        );
+      if (!user) {
+        throw new Error("User not authenticated.");
       }
 
-      const defaultColor = "#1e3a8a";
-      if (!hasPro && args.themeColor && args.themeColor !== defaultColor) {
-        throw new Error(
-          "Custom theme color is not allowed for free users. Please upgrade to a paid plan to use custom theme colors."
-        );
-      }
-
-      const themeColor = hasPro ? args.themeColor : defaultColor;
-
+      const themeColor = args.themeColor || "#FF0000";
       //generate slug from title
       const slug = args.title
         .toLowerCase()
