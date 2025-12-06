@@ -17,19 +17,29 @@ export const store = mutation({
       .unique();
     if (user !== null) {
       // If we've seen this identity before but the name has changed, patch the value.
+      const updates = {};
       if (user.name !== identity.name) {
-        await ctx.db.patch(user._id, {
-          name: identity.name,
-          updatedAt: Date.now(),
-        });
+        updates.name = identity.name ?? "Anonymous";
       }
+      if (user.email !== identity.email) {
+        updates.email = identity.email ?? "";
+      }
+      if (user.imageUrl !== identity.pictureUrl) {
+        updates.imageUrl = identity.pictureUrl;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        updates.updatedAt = Date.now();
+        await ctx.db.patch(user._id, updates);
+      }
+
       return user._id;
     }
     // If it's a new identity, create a new `User`.
     return await ctx.db.insert("users", {
       name: identity.name ?? "Anonymous",
       tokenIdentifier: identity.tokenIdentifier,
-      email: identity.email,
+      email: identity.email ?? "",
       imageUrl: identity.pictureUrl,
       hasCompletedOnboarding: false,
       freeEventsCreated: 0,
@@ -54,7 +64,7 @@ export const getCurrentUser = query({
       .unique();
 
     if (!user) {
-      throw new Error("User not found");
+      return null;
     }
 
     return user;

@@ -125,7 +125,7 @@ const Header = () => {
         {/* loader */}
         {isLoading && (
           <div className="absolute bottom-0 left-0 w-full">
-            <BarLoader width={"100%"} color="#a855f0" />
+            <BarLoader width={"100%"} color="#a855f7" />
           </div>
         )}
 
