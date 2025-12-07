@@ -84,6 +84,7 @@ export const getEventsByOrganizer = query({
     const events = await ctx.db
       .query("events")
       .withIndex("by_organizer", (q) => q.eq("organizerId", user._id))
+      .order("desc")
       .collect();
     return events;
   },

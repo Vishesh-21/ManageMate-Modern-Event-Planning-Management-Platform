@@ -11,10 +11,10 @@ export const eventSchema = z.object({
   tags: z.array(
     z.string().min(3, "Each tag must be at least 3 characters long")
   ),
-  startDate: z
+  startTime: z
     .string()
     .regex(timeRegex, "Start date must be in HH:MM 24-hour format"),
-  endDate: z
+  endTime: z
     .string()
     .regex(timeRegex, "End date must be in HH:MM 24-hour format"),
   locationType: z.enum(["physical", "online"]).default("physical"),
@@ -27,6 +27,9 @@ export const eventSchema = z.object({
   capacity: z.number().min(1, "Capacity must be at least 1"),
   ticketPrice: z.number().min(0, "Ticket price cannot be negative"),
   coverImage: z.string().optional(),
-  tickerType: z.enum(["free", "paid"]).default("free"),
+  ticketType: z.enum(["free", "paid"]).default("free"),
   themeColor: z.string().default("#1e3a8a"),
+
+  startDate: z.date({ required_error: "Start date is required" }),
+  endDate: z.date({ required_error: "End date is required" }),
 });

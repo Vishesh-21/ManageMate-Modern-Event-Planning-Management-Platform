@@ -85,7 +85,6 @@ export const colorPresetsFunction = (hasPro) => {
       "#1e293b",
       "#991b1b",
       "#c2410c",
-      "#f59e0b",
       "#ca8a04",
       "#65a30d",
       "#15803d",

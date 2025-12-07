@@ -2,30 +2,30 @@
 
 import { useConvexQuery } from "@/hooks/useConvexQuery";
 import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 import { useConvexMutation } from "@/hooks/useConvexMutation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { eventSchema } from "@/lib/event-schema";
+import { useRouter } from "next/navigation";
+import { colorPresetsFunction, combineDateAndTime } from "@/lib/helper";
 import { City, State } from "country-state-city";
-import { UpgradeModal } from "@/components/upgrade-modal";
+import { toast } from "sonner";
 import Image from "next/image";
-import UnsplashImagePicker from "./_components/unsplash-image-picker";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles } from "lucide-react";
 import { Crown } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { CATEGORIES } from "@/lib/data";
 import {
   Select,
   SelectContent,
@@ -33,11 +33,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { colorPresetsFunction, combineDateAndTime } from "@/lib/helper";
-import { toast } from "sonner";
+import { CATEGORIES } from "@/lib/data";
 import { Textarea } from "@/components/ui/textarea";
+import { Loader2 } from "lucide-react";
+import { UpgradeModal } from "@/components/upgrade-modal";
+import UnsplashImagePicker from "./_components/unsplash-image-picker";
+import { format } from "date-fns";
 
 const CreateEventPage = () => {
   const router = useRouter();
@@ -68,17 +69,12 @@ const CreateEventPage = () => {
       description: "",
       category: "",
       tags: [],
-      startDate: "",
-      endDate: "",
+      startTime: "",
+      endTime: "",
       locationType: "physical",
-      venue: "",
-      address: "",
-      city: "",
-      state: "",
       capacity: 50,
       ticketPrice: 0,
-      coverImage: "",
-      tickerType: "free",
+      ticketType: "free",
       themeColor: "#1e3a8a",
     },
   });
@@ -88,7 +84,7 @@ const CreateEventPage = () => {
   const endDate = watch("endDate");
   const startDate = watch("startDate");
   const selectedState = watch("state");
-  const ticketType = watch("tickerType");
+  const ticketType = watch("ticketType");
 
   //all color presets
   const colorPresets = useMemo(() => colorPresetsFunction(hasPro), [hasPro]);
@@ -185,7 +181,10 @@ const CreateEventPage = () => {
             </p>
           )}
         </div>
+
+        {/* future ai generated functionality  */}
       </div>
+
       <div className="max-w-5xl mx-auto grid md:grid-cols-[320px_1fr] gap-10">
         {/*left : image and theme selector  */}
         <div className="space-y-6">
@@ -224,10 +223,10 @@ const CreateEventPage = () => {
 
             {/* all color presets  */}
             <div className="flex gap-2 flex-wrap">
-              {colorPresets.map((color, i) => {
+              {colorPresets.map((color) => {
                 return (
                   <button
-                    key={`${color}-${i}`}
+                    key={`${color}`}
                     type="button"
                     className={`w-10 h-10 border-2 border-white rounded-full cursor-pointer transition-all ${
                       !hasPro && color !== "#1e3a8a"
@@ -374,7 +373,7 @@ const CreateEventPage = () => {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((cat, i) => (
+                    {CATEGORIES.map((cat) => (
                       <SelectItem key={cat.id} value={cat.id}>
                         {cat.icon} {cat.label}
                       </SelectItem>
@@ -391,7 +390,7 @@ const CreateEventPage = () => {
           {/* Location */}
           <div className="space-y-3">
             <Label className="text-sm">Location</Label>
-            <div className="grid grid-cols-2 gap-4">
+            {/* <div className="grid grid-cols-2 gap-4">
               <Controller
                 control={control}
                 name="state"
@@ -407,7 +406,7 @@ const CreateEventPage = () => {
                       <SelectValue placeholder="Select state" />
                     </SelectTrigger>
                     <SelectContent>
-                      {indianStates.map((s, i) => (
+                      {indianStates.map((s) => (
                         <SelectItem key={s.isoCode} value={s.name}>
                           {s.name}
                         </SelectItem>
@@ -434,7 +433,7 @@ const CreateEventPage = () => {
                       />
                     </SelectTrigger>
                     <SelectContent>
-                      {cities.map((c, i) => (
+                      {cities.map((c) => (
                         <SelectItem key={c.name} value={c.name}>
                           {c.name}
                         </SelectItem>
@@ -443,7 +442,7 @@ const CreateEventPage = () => {
                   </Select>
                 )}
               />
-            </div>
+            </div> */}
 
             <div className="space-y-2 mt-6">
               <Label className="text-sm">Venue Details</Label>
@@ -524,7 +523,7 @@ const CreateEventPage = () => {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full py-6 text-lg rounded-xl"
+            className="w-full py-6 text-lg rounded-xl cursor-pointer"
           >
             {isLoading ? (
               <>
