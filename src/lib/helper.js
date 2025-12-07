@@ -112,3 +112,33 @@ export const combineDateAndTime = (date, time) => {
   d.setHours(hours, minutes, 0, 0);
   return d;
 };
+
+// Utility function to darken a color
+export function darkenColor(color, amount) {
+  const colorWithoutHash = color.replace("#", "");
+  const num = parseInt(colorWithoutHash, 16);
+  const r = Math.max(0, (num >> 16) - amount * 255);
+  const g = Math.max(0, ((num >> 8) & 0x00ff) - amount * 255);
+  const b = Math.max(0, (num & 0x0000ff) - amount * 255);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+}
+
+// Handler for sharing event
+export const handleShare = async (event) => {
+  const url = window.location.href;
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: event.title,
+        text: event.description.slice(0, 100) + "...",
+        url: url,
+      });
+    } catch (error) {
+      // User cancelled or error occurred
+    }
+  } else {
+    // Fallback: copy to clipboard
+    navigator.clipboard.writeText(url);
+    alert("Event URL copied to clipboard!");
+  }
+};

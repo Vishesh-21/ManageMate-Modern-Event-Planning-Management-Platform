@@ -75,7 +75,7 @@ const Header = () => {
               </Button>
             )}
 
-            <Button variant={"ghost"} size={"sm"} asChild className={"mr-2"}>
+            <Button variant={"ghost"} size={"sm"} asChild className={"mr-2 cursor-pointer"}>
               <Link href="/explore">Explore</Link>
             </Button>
 

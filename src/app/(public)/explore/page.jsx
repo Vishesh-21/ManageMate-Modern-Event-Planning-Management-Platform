@@ -23,7 +23,7 @@ const ExplorePage = () => {
   const { data: localEvents, loading: loadingLocalEvents } = useConvexQuery(
     api.explore.getEventsByLocation,
     {
-      city: currentUser?.city || "Gurugram",
+      city: currentUser?.city || "Gurgaon",
       state: currentUser?.state || "Haryana",
       limit: 4,
     }
@@ -145,7 +145,7 @@ const ExplorePage = () => {
               <p className="text-muted-foreground">
                 Get started by creating your first event on Manage Mate
               </p>
-              <Button asChild className={"gap-2"}>
+              <Button asChild className={"gap-2 cursor-pointer"}>
                 <a href="/create-event">Create Event</a>
               </Button>
             </div>

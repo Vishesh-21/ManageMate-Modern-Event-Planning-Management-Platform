@@ -43,7 +43,11 @@ export function UpgradeModal({ isOpen, onClose, trigger = "limit" }) {
 
         {/* Footer */}
         <div className="flex gap-3">
-          <Button variant="outline" onClick={onClose} className="flex-1">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="flex-1 cursor-pointer"
+          >
             Maybe Later
           </Button>
         </div>

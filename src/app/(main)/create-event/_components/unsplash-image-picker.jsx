@@ -51,7 +51,7 @@ export default function UnsplashImagePicker({ isOpen, onClose, onSelect }) {
             placeholder="Search for images..."
             className="flex-1"
           />
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} className={'cursor-pointer'}>
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
