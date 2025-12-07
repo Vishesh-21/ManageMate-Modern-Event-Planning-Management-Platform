@@ -24,6 +24,7 @@ import { Ticket } from "lucide-react";
 import { Share2 } from "lucide-react";
 import RegisterModal from "../_components/register-modal";
 import { handleShare } from "@/lib/helper";
+import { CheckCircle } from "lucide-react";
 
 const EventDetailPage = () => {
   const router = useRouter();

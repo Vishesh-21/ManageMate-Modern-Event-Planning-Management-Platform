@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCategoryIconById, getCategoryLabelById } from "@/lib/data";
 import { format } from "date-fns/format";
+import { QrCode } from "lucide-react";
+import { Eye } from "lucide-react";
 import { Calendar } from "lucide-react";
 import { Users } from "lucide-react";
 import { Trash2 } from "lucide-react";
@@ -14,7 +16,7 @@ const EventCard = ({
   event,
   onEventClick,
   variant = "grid",
-  showActions = false,
+  action = null, // "event" | "ticket" | null
   onDelete,
   className = "",
 }) => {
@@ -128,18 +130,26 @@ const EventCard = ({
           </div>
         </div>
 
-        {showActions && (
-          <div className="flex gap-2">
+        {action && (
+          <div className="flex gap-2 pt-2">
             <Button
               variant={"outline"}
               size={"sm"}
               className="flex-1 cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
-                onClick?.(e);
+                onEventClick?.(e);
               }}
             >
-              View
+              {action === "event" ? (
+                <>
+                  <Eye className="w-4 h-4" /> View
+                </>
+              ) : (
+                <>
+                  <QrCode className="w-4 h-4" /> Show ticket
+                </>
+              )}
             </Button>
 
             {onDelete && (
@@ -152,7 +162,15 @@ const EventCard = ({
                   onDelete?.(event._id);
                 }}
               >
-                <Trash2 className="w-4 h-4" />
+                {action === "event" ? (
+                  <>
+                    <Trash2 className="w-4 h-4" /> Delete
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" /> Cancel
+                  </>
+                )}
               </Button>
             )}
           </div>
