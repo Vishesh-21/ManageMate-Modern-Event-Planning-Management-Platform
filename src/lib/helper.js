@@ -1,4 +1,5 @@
 import { State, City } from "country-state-city";
+import { toast } from "sonner";
 
 export const createSlug = (city, state) => {
   if (!city || !state) return "";
@@ -141,4 +142,41 @@ export const handleShare = async (event) => {
     navigator.clipboard.writeText(url);
     alert("Event URL copied to clipboard!");
   }
+};
+
+//function to export registrations as CSV
+export const handleExportCSV = (registrations, dashboardData) => {
+  if (!registrations || registrations.length === 0) {
+    toast.error("No registrations to export");
+    return;
+  }
+
+  const csvContent = [
+    [
+      "Name",
+      "Email",
+      "Registered At",
+      "Checked In",
+      "Checked In At",
+      "QR Code",
+    ],
+    ...registrations.map((reg) => [
+      reg.attendeeName,
+      reg.attendeeEmail,
+      new Date(reg.registeredAt).toLocaleString(),
+      reg.checkedIn ? "Yes" : "No",
+      reg.checkedInAt ? new Date(reg.checkedInAt).toLocaleString() : "-",
+      reg.qrCode,
+    ]),
+  ]
+    .map((row) => row.join(","))
+    .join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${dashboardData?.event.title || "event"}_registrations.csv`;
+  a.click();
+  toast.success("CSV exported successfully");
 };
