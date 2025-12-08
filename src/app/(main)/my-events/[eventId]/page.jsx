@@ -63,8 +63,8 @@ export default function EventDashboardPage() {
 
     try {
       await deleteEvent({ eventId });
-      toast.success("Event deleted successfully");
       router.push("/my-events");
+      toast.success("Event deleted successfully");
     } catch (error) {
       toast.error(error.message || "Failed to delete event");
     }

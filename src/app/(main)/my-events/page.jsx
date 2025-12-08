@@ -56,6 +56,9 @@ export default function MyEventsPage() {
             <h1 className="text-4xl font-bold mb-2">My Events</h1>
             <p className="text-muted-foreground">Manage your created events</p>
           </div>
+          <div>
+            <h1 className="text-medium text-foreground/50">Total Events: {events?.length}</h1>
+          </div>
         </div>
 
         {events?.length === 0 ? (

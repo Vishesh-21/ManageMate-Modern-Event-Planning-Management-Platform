@@ -12,12 +12,12 @@ const CategoryCard = ({ category }) => {
     <Card
       key={category.id}
       className={
-        "py-2 group cursor-pointer hover:shadow-lg transition-all hover:border-purple-500/50"
+        "py-2 group cursor-pointer hover:shadow-lg hover:shadow-purple-500/10 transition-all hover:border-purple-500/50"
       }
       onClick={() => handleEventClick(category.id)}
     >
       <CardContent className="px-3 sm:p-6 flex items-center gap-3">
-        <div className="text-3xl sm:text-4xl -rotate-15 group-hover:rotate-0 group-hover:scale-110 transition-transform">
+        <div className="text-3xl sm:text-4xl scale-70 group-hover:scale-115 transition-transform duration-400 ">
           {category.icon}
         </div>
 
