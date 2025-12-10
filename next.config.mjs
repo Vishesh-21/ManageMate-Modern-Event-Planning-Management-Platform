@@ -2,7 +2,7 @@
 const nextConfig = {
   /* config options here */
   images: {
-    remotePatterns: ["res.cloudinary.com", "images.unsplash.com"],
+    domains: ["res.cloudinary.com", "images.unsplash.com"],
   },
 };
 
