@@ -1,30 +1,27 @@
+/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
-import { useConvexQuery } from "@/hooks/useConvexQuery";
-import { useAuth } from "@clerk/nextjs";
-import { useMemo, useState } from "react";
-import { api } from "../../../../convex/_generated/api";
-import { useConvexMutation } from "@/hooks/useConvexMutation";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { eventSchema } from "@/lib/event-schema";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { colorPresetsFunction, combineDateAndTime } from "@/lib/helper";
-import { City, State } from "country-state-city";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { format } from "date-fns";
+import { State, City } from "country-state-city";
+import { CalendarIcon, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image";
+import { useAuth } from "@clerk/nextjs";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Crown } from "lucide-react";
-import { Sparkles } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import {
   Popover,
-  PopoverContent,
   PopoverTrigger,
+  PopoverContent,
 } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
@@ -33,25 +30,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CATEGORIES } from "@/lib/data";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
+import Image from "next/image";
+import { api } from "../../../../convex/_generated/api";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
+import { useConvexMutation } from "@/hooks/useConvexMutation";
 import { UpgradeModal } from "@/components/upgrade-modal";
 import UnsplashImagePicker from "./_components/unsplash-image-picker";
-import { format } from "date-fns";
+import { CATEGORIES } from "@/lib/data";
+import { eventSchema } from "@/lib/event-schema";
+import { colorPresetsFunction } from "@/lib/helper";
 
-const CreateEventPage = () => {
+export default function CreateEventPage() {
   const router = useRouter();
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [upgradeReason, setUpgradeReason] = useState("limit"); //"limit", "color"
+  const [upgradeReason, setUpgradeReason] = useState("limit"); // "limit" or "color"
 
-  //check if the user has pro plan or not
+  // Check if user has Pro plan
   const { has } = useAuth();
   const hasPro = has?.({ plan: "pro" });
 
   const { data: currentUser } = useConvexQuery(api.users.getCurrentUser);
-  const { mutate: createEvent, loading: isLoading } = useConvexMutation(
+  const { mutate: createEvent, isLoading } = useConvexMutation(
     api.events.createEvent
   );
 
@@ -65,43 +65,38 @@ const CreateEventPage = () => {
   } = useForm({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      title: "",
-      description: "",
+      locationType: "physical",
+      ticketType: "free",
+      capacity: 50,
+      themeColor: "#1e3a8a",
       category: "",
-      tags: [],
+      state: "",
+      city: "",
       startTime: "",
       endTime: "",
-      locationType: "physical",
-      capacity: 50,
-      ticketPrice: 0,
-      ticketType: "free",
-      themeColor: "#1e3a8a",
     },
   });
 
   const themeColor = watch("themeColor");
-  const coverImage = watch("coverImage");
-  const endDate = watch("endDate");
-  const startDate = watch("startDate");
-  const selectedState = watch("state");
   const ticketType = watch("ticketType");
+  const selectedState = watch("state");
+  const startDate = watch("startDate");
+  const endDate = watch("endDate");
+  const coverImage = watch("coverImage");
 
-  //all color presets
-  const colorPresets = useMemo(() => colorPresetsFunction(hasPro), [hasPro]);
-
-  //get all the states
-  const indianStates = useMemo(() => State.getAllStates("IN"), []);
-
-  //get all the cities based on selected state
+  const indianStates = useMemo(() => State.getStatesOfCountry("IN"), []);
   const cities = useMemo(() => {
     if (!selectedState) return [];
-    const state = indianStates.find((state) => state.name === selectedState);
-
-    if (!state) return [];
-    return City.getCitiesOfState("IN", state.isoCode);
+    const st = indianStates.find((s) => s.name === selectedState);
+    if (!st) return [];
+    return City.getCitiesOfState("IN", st.isoCode);
   }, [selectedState, indianStates]);
 
+  // Color presets - show all for Pro, only default for Free
+  const colorPresets = colorPresetsFunction(hasPro);
+
   const handleColorClick = (color) => {
+    // If not default color and user doesn't have Pro
     if (color !== "#1e3a8a" && !hasPro) {
       setUpgradeReason("color");
       setShowUpgradeModal(true);
@@ -110,28 +105,36 @@ const CreateEventPage = () => {
     setValue("themeColor", color);
   };
 
-  //on form submit
+  const combineDateTime = (date, time) => {
+    if (!date || !time) return null;
+    const [hh, mm] = time.split(":").map(Number);
+    const d = new Date(date);
+    d.setHours(hh, mm, 0, 0);
+    return d;
+  };
+
   const onSubmit = async (data) => {
     try {
-      const start = combineDateAndTime(data.startDate, data.startTime);
-      const end = combineDateAndTime(data.endDate, data.endTime);
+      const start = combineDateTime(data.startDate, data.startTime);
+      const end = combineDateTime(data.endDate, data.endTime);
 
       if (!start || !end) {
-        toast.error("Select start or end date/time");
+        toast.error("Please select both date and time for start and end.");
         return;
       }
-
       if (end.getTime() <= start.getTime()) {
-        toast.error("End date/time must be after start date/time");
+        toast.error("End date/time must be after start date/time.");
         return;
       }
 
-      if (!hasPro && (currentUser?.freeEventsCount || 0) >= 10) {
+      // Check event limit for Free users
+      if (!hasPro && currentUser?.freeEventsCreated >= 10) {
         setUpgradeReason("limit");
         setShowUpgradeModal(true);
         return;
       }
 
+      // Check if trying to use custom color without Pro
       if (data.themeColor !== "#1e3a8a" && !hasPro) {
         setUpgradeReason("color");
         setShowUpgradeModal(true);
@@ -151,7 +154,7 @@ const CreateEventPage = () => {
         address: data.address || undefined,
         city: data.city,
         state: data.state || undefined,
-        Country: "India",
+        country: "India",
         capacity: data.capacity,
         ticketType: data.ticketType,
         ticketPrice: data.ticketPrice || undefined,
@@ -162,45 +165,42 @@ const CreateEventPage = () => {
       toast.success("Event created successfully! 🎉");
       router.push("/my-events");
     } catch (error) {
-      toast.error(error.message || "Failed to create event!");
+      toast.error(error.message || "Failed to create event");
     }
   };
 
   return (
     <div
+      className="min-h-screen transition-colors duration-300 px-6 py-8 -mt-6 md:-mt-16 lg:-mt-5 lg:rounded-md"
       style={{ backgroundColor: themeColor }}
-      className="min-h-screen transition-colors duration-300 px-6 py-8 -mt-6 md:-mt-6 "
     >
-      <div className="max-w-5xl mx-auto flex flex-col gap-5 md:flex-row justify-between mb-6">
-        {/* title and ai generated functionality */}
+      {/* Header */}
+      <div className="max-w-6xl mx-auto flex flex-col gap-5 md:flex-row justify-between mb-10">
         <div>
           <h1 className="text-4xl font-bold">Create Event</h1>
           {!hasPro && (
-            <p className="text-sm text-yellow-500 mt-1">
-              Free : {currentUser?.freeEventsCount || 0} / 10 events created
+            <p className="text-sm text-muted-foreground mt-2">
+              Free: {currentUser?.freeEventsCreated || 0}/1 events created
             </p>
           )}
         </div>
-
-        {/* future ai generated functionality  */}
       </div>
 
-      <div className="max-w-5xl mx-auto grid md:grid-cols-[320px_1fr] gap-10">
-        {/*left : image and theme selector  */}
+      <div className="max-w-6xl mx-auto grid md:grid-cols-[320px_1fr] gap-10">
+        {/* LEFT: Image + Theme */}
         <div className="space-y-6">
           <div
             className="aspect-square w-full rounded-xl overflow-hidden flex items-center justify-center cursor-pointer border"
-            onClick={() => {
-              setShowImagePicker(true);
-            }}
+            onClick={() => setShowImagePicker(true)}
           >
             {coverImage ? (
               <Image
                 src={coverImage}
+                alt="Cover"
                 className="w-full h-full object-cover"
-                width={500}
-                height={500}
-                alt="Cover Image"
+                width={500} // Adjust width as needed
+                height={500} // Adjust height as needed
+                priority // Optional: prioritize loading this image
               />
             ) : (
               <span className="opacity-60 text-sm">
@@ -209,45 +209,38 @@ const CreateEventPage = () => {
             )}
           </div>
 
-          {/* color picker  */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className={"text-sm"}>Theme Color</Label>
+              <Label className="text-sm">Theme Color</Label>
               {!hasPro && (
-                <Badge variant={"secondary"} className={"text-xs gap-1"}>
-                  <Crown className="w-3 h-3" />
+                <Badge variant="secondary" className="text-xs gap-1">
+                  <Sparkles className="w-3 h-3" />
                   Pro
                 </Badge>
               )}
             </div>
-
-            {/* all color presets  */}
             <div className="flex gap-2 flex-wrap">
-              {colorPresets.map((color) => {
-                return (
-                  <button
-                    key={`${color}`}
-                    type="button"
-                    className={`w-10 h-10 border-2 border-white rounded-full cursor-pointer transition-all ${
-                      !hasPro && color !== "#1e3a8a"
-                        ? "opacity-40 cursor-not-allowed"
-                        : "hover:scale-110"
-                    }`}
-                    style={{
-                      backgroundColor: color,
-                      borderColor:
-                        themeColor === color ? "white" : "transparent",
-                    }}
-                    onClick={() => handleColorClick(color)}
-                    title={
-                      !hasPro && color !== "#1e3a8a"
-                        ? "Upgrade to Pro to unlock more colors"
-                        : ""
-                    }
-                  />
-                );
-              })}
-
+              {colorPresets.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  className={`w-10 h-10 rounded-full border-2 transition-all ${
+                    !hasPro && color !== "#1e3a8a"
+                      ? "opacity-40 cursor-not-allowed"
+                      : "hover:scale-110"
+                  }`}
+                  style={{
+                    backgroundColor: color,
+                    borderColor: themeColor === color ? "white" : "transparent",
+                  }}
+                  onClick={() => handleColorClick(color)}
+                  title={
+                    !hasPro && color !== "#1e3a8a"
+                      ? "Upgrade to Pro for custom colors"
+                      : ""
+                  }
+                />
+              ))}
               {!hasPro && (
                 <button
                   type="button"
@@ -255,30 +248,29 @@ const CreateEventPage = () => {
                     setUpgradeReason("color");
                     setShowUpgradeModal(true);
                   }}
-                  className="w-10 h-10 cursor-pointer rounded-full border-2 border-dashed border-purple-300 flex items-center justify-center hover:border-purple-500 transition-colors"
+                  className="w-10 h-10 rounded-full border-2 border-dashed border-purple-300 flex items-center justify-center hover:border-purple-500 transition-colors"
                   title="Unlock more colors with Pro"
                 >
                   <Sparkles className="w-5 h-5 text-purple-400" />
                 </button>
               )}
             </div>
-
             {!hasPro && (
-              <p className="text-xs text-yellow-500 mt-1">
-                Upgrade to Pro to unlock more colors
+              <p className="text-xs text-muted-foreground">
+                Upgrade to Pro to unlock custom theme colors
               </p>
             )}
           </div>
         </div>
 
-        {/* right : form  */}
+        {/* RIGHT: Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Title */}
           <div>
             <Input
               {...register("title")}
               placeholder="Event Name"
-              className="text-3xl font-semibold bg-transparent border-none focus-visible:ring-0"
+              className="md:text-xl text-lg font-semibold bg-transparent border-none focus-visible:ring-0"
             />
             {errors.title && (
               <p className="text-sm text-red-400 mt-1">
@@ -288,7 +280,7 @@ const CreateEventPage = () => {
           </div>
 
           {/* Date + Time */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 grid-cols-1 gap-6">
             {/* Start */}
             <div className="space-y-2">
               <Label className="text-sm">Start</Label>
@@ -390,7 +382,7 @@ const CreateEventPage = () => {
           {/* Location */}
           <div className="space-y-3">
             <Label className="text-sm">Location</Label>
-            {/* <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <Controller
                 control={control}
                 name="state"
@@ -442,7 +434,7 @@ const CreateEventPage = () => {
                   </Select>
                 )}
               />
-            </div> */}
+            </div>
 
             <div className="space-y-2 mt-6">
               <Label className="text-sm">Venue Details</Label>
@@ -523,7 +515,7 @@ const CreateEventPage = () => {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full py-6 text-lg rounded-xl cursor-pointer"
+            className="w-full py-6 text-lg rounded-xl"
           >
             {isLoading ? (
               <>
@@ -536,7 +528,7 @@ const CreateEventPage = () => {
         </form>
       </div>
 
-      {/* unsplash image picker */}
+      {/* Unsplash Picker */}
       {showImagePicker && (
         <UnsplashImagePicker
           isOpen={showImagePicker}
@@ -548,7 +540,7 @@ const CreateEventPage = () => {
         />
       )}
 
-      {/* upgrade modal */}
+      {/* Upgrade Modal */}
       <UpgradeModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
@@ -556,6 +548,4 @@ const CreateEventPage = () => {
       />
     </div>
   );
-};
-
-export default CreateEventPage;
+}

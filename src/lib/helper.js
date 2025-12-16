@@ -136,6 +136,7 @@ export const handleShare = async (event) => {
       });
     } catch (error) {
       // User cancelled or error occurred
+      console.error("Error sharing:", error);
     }
   } else {
     // Fallback: copy to clipboard
